@@ -11,8 +11,16 @@ public class SpaceController : NetworkBehaviour
     public float limiteDerecho = 7f; // Límite derecho de la cámara
     public GameObject proyectilPrefab; // Prefab del proyectil
     public Transform puntoDeDisparo; // Punto desde el cual se dispararán los proyectiles
-    public float cadenciaDeDisparo = 2f; // Tiempo en segundos entre disparos
-    private float tiempoUltimoDisparo; // Guarda el tiempo del último disparo
+    public float cadenciaDeDisparo = 0.25f; // Tiempo en segundos entre disparos
+    private float tiempoUltimoDisparo;
+
+    private void Start()
+    {
+        if (IsOwner)
+        {
+            this.GetComponent<SpriteRenderer>().color = new Color (230,255,0,255);
+        }
+    }
     void Update()
     {
         // Obtener la entrada de teclado para el eje horizontal (izquierda/derecha)
@@ -30,15 +38,26 @@ public class SpaceController : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        CheckFire();
+        DisparoContinuo();
 
     }
 
-
+    void DisparoContinuo()
+    {
+        if (Input.GetButton("Jump"))
+        {
+            if (Time.time > tiempoUltimoDisparo + cadenciaDeDisparo)
+            {
+                CheckFire();
+                tiempoUltimoDisparo = Time.time;
+            }
+        }
+    }
     public void CheckFire()
     {
-        if (Input.GetButtonDown("Fire1"))
-            FireServerRpc(transform.rotation, puntoDeDisparo.transform.position);
+        //if (Input.GetButtonDown("Fire1"))
+            FireServerRpc(transform.rotation, puntoDeDisparo.transform.position)
+            ;
     }
 
     [ServerRpc(RequireOwnership = false)]
